@@ -82,7 +82,49 @@ cat gzip_cmds.sh | parallel -j 2 --eta --joblog gzip_log2.txt '{}'
 The result should be the same as above!
 
 
-## gnu.parallel_cmds_vs_log.py usage example
+## Detailed gnu.parallel_cmds_vs_log.py usage example
 
-`gnu.parallel_cmds_vs_log.py` 
+`gnu.parallel_cmds_vs_log.py` is useful when you are running many commands in parallel, and you are concerned that some jobs may not have run or threw an error. Note that this requires that the commands run are present in a file, using the approach we used to run `gzip_cmds.sh` above, so that the original commands can be compared to those in the `--joblog` output table.
 
+The basic usage is to just get summary counts of the numbers of jobs in different categories (corresponding to the seven categories described at the top of this page).
+
+For instance, if you run:
+```
+python ../gnu.parallel_cmds_vs_log.py --cmds gzip_cmds.sh --log gzip_log2.txt
+```
+
+You should see:
+```
+successful_jobs_unique 10
+failed_jobs_unique 0
+jobs_not_run 0
+successful_jobs_redundant 0
+failed_jobs_repeated 0
+successful_jobs_after_fail 0
+failed_jobs_after_success 0
+```
+
+In this case all jobs were run, and no jobs failed (note that the rows 4-7 correspond capture cases where a job is in the joblog file multiple times, which can happen if GNU parallel is instructed to re-run failed jobs for instance).
+
+**But what about if there _are_ failed jobs?** We can create this scenario by simply adding another command to gzip a file that doesn't exist.
+
+Decompress file a final time:
+```
+gunzip testfile*txt.gz
+```
+
+Add an additional gzip command for a file that doesn't exist, which will cause an error, and re-run gzip commands with `parallel`:
+```
+echo "gzip testfile.Iamgonnafail.txt" >> gzip_cmds.sh
+cat gzip_cmds.sh | parallel -j 2 --eta --joblog gzip_log3.txt '{}'
+```
+You should have the error `gzip: testfile.Iamgonnafail.txt: No such file or directory` and you will note an Exitval of 1 for this command in `gzip_log3.txt`, but you can imagine this would be easy to miss if you were running 1000's of commands in parallel.
+
+To get a summary of the parallel joblog file, and **to get a file containing all failed commands** (which can make it easier to re-run commands after you fix the problem):
+```
+python ../gnu.parallel_cmds_vs_log.py --cmds gzip_cmds.sh \
+                                      --log gzip_log3.txt \
+                                      --failed_cmds gzip_failed_cmds.txt
+```
+
+The summary counts should not indicate that one job failed, which you can see in `gzip_failed_cmds.txt`.
