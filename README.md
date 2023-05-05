@@ -1,6 +1,6 @@
 # parallel_joblog_summary
 
-**Script for summarizing GNU parallel joblog file, to identify how many and which jobs failed (if any)**
+**Script for summarizing GNU parallel joblog file. Useful for identifying how many and which jobs failed (if any), and to ensure that all commands finished successfully.**
 
 [GNU parallel](https://git.savannah.gnu.org/cgit/parallel.git) is an extremely useful tool for parallelizing commands on the command-line. You can see this [tutorial](https://github.com/LangilleLab/microbiome_helper/wiki/Quick-Introduction-to-GNU-Parallel) from 2017 that I wrote to showcase some of the key features.
 
@@ -108,7 +108,7 @@ In this case all jobs were run, and no jobs failed (note that the rows 4-7 corre
 
 **But what about if there _are_ failed jobs?** We can create this scenario by simply adding another command to gzip a file that doesn't exist.
 
-Decompress file a final time:
+Decompress the files a final time:
 ```
 gunzip testfile*txt.gz
 ```
