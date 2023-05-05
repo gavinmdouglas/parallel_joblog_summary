@@ -26,9 +26,11 @@ If specified, jobs that were never run, and jobs that were run but failed, can b
 **Usage example:**
 
 ```
-python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_to_run REMAINING_CMDS_FILE.txt --failed_cmds FAILED_CMDS.txt
+python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt \
+                                   --log JOBLOG.txt \
+                                   --cmds_to_run REMAINING_CMDS_FILE.txt \
+                                   --failed_cmds FAILED_CMDS.txt
 ```
-
 
 ## Standard GNU Parallel examples
 
