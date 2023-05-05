@@ -58,13 +58,11 @@ Let's say we wanted to run two `gzip` commands at a time to compress these files
 parallel -j 2 --eta --joblog gzip_log.txt 'gzip {}' ::: testfile*txt
 ```
 
-The files should now all be gzipped and you can look in `gzip_log.txt` to see the job running summay per command (the `Exitval` and `Signal` columns should all contains 0's to indicate they finished successfully).
+The files should now all be gzipped and you can look in `gzip_log.txt` to see the job running summary per command (the `Exitval` and `Signal` columns should all contains 0's to indicate they finished successfully).
 
-Note that in the above example, we specified the command structure `gzip {}` and the input files `::: testfile*txt` separately. If you use this `--dry-run` option you can see a print out of the full commands without running them.
+Note that in the above example, we specified the command structure `gzip {}` and the input files `::: testfile*txt` separately. If you use the `--dry-run` option, the full commands will be printed to screen without running them.
 
-You can also explicitly write out the commands you want to run and pass them to `parallel`.
-
-As an example, decompress the files and create a new file containing the gzip command we want to run:
+You can also explicitly write out the commands you want to run and pass them to `parallel`. As an example, decompress the files and create a new file containing the gzip command we want to run:
 ```
 gunzip testfile*txt.gz
 
@@ -104,7 +102,7 @@ successful_jobs_after_fail 0
 failed_jobs_after_success 0
 ```
 
-In this case all jobs were run, and no jobs failed (note that the rows 4-7 correspond capture cases where a job is in the joblog file multiple times, which can happen if GNU parallel is instructed to re-run failed jobs for instance).
+In this case all jobs were run, and no jobs failed (note that the rows 4-7 correspond capture cases where a job is in the joblog file multiple times, which can happen if GNU parallel is instructed to re-run failed jobs, for instance).
 
 **But what about if there _are_ failed jobs?** We can create this scenario by simply adding another command to gzip a file that doesn't exist.
 
