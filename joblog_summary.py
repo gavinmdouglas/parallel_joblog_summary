@@ -3,6 +3,8 @@
 import argparse
 import sys
 
+__version__ = '1.0.1'
+
 
 def main():
 
@@ -13,7 +15,9 @@ def main():
                         "the --joblog option.\nIt will provide a breakdown of how many commands fit into the following categories (to standard output):\n"
                         "    (1) Finished successfully (and only present once in log)\n"
                         "    (2) Failed (and only present once in log)\n"
-                        "    (3) Were never run (i.e., not found in log)\n"
+                        "    (3) Was never run (i.e., not found in log)\n"
+                        "\n"
+                        "These additional outputs may also be output, but only if they are > 0, as they only rarely occur:\n"
                         "    (4) Present multiple times in log, but was successful everytime. Indicates redundancy and likely user error.\n"
                         "    (5) Present multiple times in log, but failed everytime.\n"
                         "    (6) Finished successfully upon last instance, but failed when run earlier in log (so likely re-run after an error)\n"
@@ -47,16 +51,16 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
                         required=False)
 
     parser.add_argument('--unfinished', metavar="UNFINISHED_CMDS", type=str,
-                        help="Path to new commands file containing unfinished commands that were either unrun or that failed (i.e., combination of --cmds_to_run and --failed_cmds).  "
-                             "Note that these commands will not be output at all unless this option is specified.",
+                        help="Path to new commands file containing unfinished commands that were either unrun or that failed (i.e., combination of --cmds_to_run and --failed_cmds).",
                         default=None,
                         required=False)
 
+    parser.add_argument('--version', action='version', version='%(prog)s v' + __version__)
+
     args = parser.parse_args()
 
-    # Read commands into set.
+    # Read in commands.
     cmds = set()
-
     blank_cmds = 0
     with open(args.cmds, 'r') as cmds_infile:
         for raw_cmd in cmds_infile:
@@ -168,13 +172,24 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
                         successful_jobs_after_fail.remove(log_cmd)
 
         # Print out summary table to standard output.
-        print('successful_jobs_unique ' + str(len(successful_jobs_unique)))
-        print('failed_jobs_unique ' + str(len(failed_jobs_unique)))
-        print('jobs_not_run ' + str(len(jobs_to_run)))
-        print('successful_jobs_redundant ' + str(len(successful_jobs_redundant)))
-        print('failed_jobs_repeated ' + str(len(failed_jobs_repeated)))
-        print('successful_jobs_after_fail ' + str(len(successful_jobs_after_fail)))
-        print('failed_jobs_after_success ' + str(len(failed_jobs_after_success)))
+        print('Successful (and present once in joblog)\t' + str(len(successful_jobs_unique)))
+        print('Failed (and present once in joblog)\t' + str(len(failed_jobs_unique)))
+        print('Not run (i.e., not present in joblog)\t' + str(len(jobs_to_run)))
+
+        if len(successful_jobs_redundant) > 0 or len(failed_jobs_repeated) > 0 or len(successful_jobs_after_fail) > 0 or len(failed_jobs_after_success) > 0:
+            print('\n\n***Additional information that often indicates an issue with how the commands were run***. Be sure to investigate the below categories further.\n')
+
+            if len(successful_jobs_redundant) > 0:
+                print('successful_jobs_redundant\t' + str(len(successful_jobs_redundant)))
+
+            if len(failed_jobs_repeated) > 0:
+                print('failed_jobs_repeated\t' + str(len(failed_jobs_repeated)))
+
+            if len(successful_jobs_after_fail) > 0:
+                print('successful_jobs_after_fail\t' + str(len(successful_jobs_after_fail)))
+
+            if len(failed_jobs_after_success) > 0:
+                print('failed_jobs_after_success\t' + str(len(failed_jobs_after_success)))
 
         jobs_to_run = sorted(list(jobs_to_run))
         failed_jobs_any = sorted(list(failed_jobs_any))
