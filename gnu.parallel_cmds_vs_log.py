@@ -2,7 +2,6 @@
 
 import argparse
 import sys
-import os
 
 
 def main():
@@ -21,31 +20,37 @@ def main():
                         "    (7) Produced error upon last instance in log, but was successful at least once in another instance. This is a redflag that a successful job might have been partially overwritten.\n"
                         "An error will be thrown if there are any commands in the log file that are not present in the commands file. Also, note that empty commands "
                         "(in input command file or in logfile) will be ignored. This can happen if people put empty lines in between input commands accidently.\n\n"
-                        "If specified, jobs that were never run, and jobs that were run but failed, can be written out to new (separate) command files.\n",
+                        "If specified, jobs that were never run, and jobs that were run but failed, or both combined, can be written out to new (separate) command files.\n",
 
-epilog='''Usage example:
+            epilog='''Usage example:
 
 python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_to_run NEW_CMDS_FILE.txt --failed_cmds FAILED_CMDS.txt
 
 ''', formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('--cmds', metavar="CMDS_INPUT", type=str,
-                        help="Path to input commands file that was input to parallel", required = True)
+                        help="Path to input commands file that was input to parallel", required=True)
 
     parser.add_argument('--log', metavar="LOG_INPUT", type=str,
-                        help="Path to input log file created with parallel --joblog", required = True)
+                        help="Path to input log file created with parallel --joblog", required=True)
 
-    parser.add_argument('--cmds_to_run', metavar="REMAINING_CMDS", type=str,
+    parser.add_argument('--cmds_to_run', metavar="UNRUN_CMDS", type=str,
                         help="Path to new commands file containing only commands that have not been run yet (i.e., they have not even been tried yet, so this does not include failed commands). "
                              "Note that these commands will not be output at all unless this option is specified.",
-                        default = None,
-                        required = False)
+                        default=None,
+                        required=False)
 
     parser.add_argument('--failed_cmds', metavar="FAILED_CMDS", type=str,
                         help="Path to new commands file containing only commands that are marked as failed at least once in the job log file. "
                              "Note that these commands will not be output at all unless this option is specified.",
-                        default = None,
-                        required = False)
+                        default=None,
+                        required=False)
+
+    parser.add_argument('--remain', metavar="UNFINISHED_CMDS", type=str,
+                        help="Path to new commands file containing commands that were either unrun or that failed (i.e., combination of --cmds_to_run and --failed_cmds).  "
+                             "Note that these commands will not be output at all unless this option is specified.",
+                        default=None,
+                        required=False)
 
     args = parser.parse_args()
 
@@ -63,9 +68,8 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
 
             if raw_cmd in cmds:
                 sys.exit('Error, this command (in between quotes) is present multiple times in the commands infile: \"' + raw_cmd + '\"')
-            else:   
+            else:
                 cmds.add(raw_cmd)
-
 
     jobs_to_run = cmds.copy()
 
@@ -78,8 +82,6 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
     failed_jobs_unique = set()
     failed_jobs_repeated = set()
     failed_jobs_after_success = set()
-
-    log_cmds = set()
 
     # Parse log file.
     blank_log_cmds = 0
@@ -135,7 +137,7 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
 
                     elif log_cmd in failed_jobs_after_success:
                         failed_jobs_after_success.remove(log_cmd)
-                        
+
             else:
                 # If job failed, then these are the options:
                 # 1) First instance and failed
@@ -165,7 +167,6 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
                     elif log_cmd in successful_jobs_after_fail:
                         successful_jobs_after_fail.remove(log_cmd)
 
-
         # Print out summary table to standard output.
         print('successful_jobs_unique ' + str(len(successful_jobs_unique)))
         print('failed_jobs_unique ' + str(len(failed_jobs_unique)))
@@ -178,16 +179,24 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
         if args.cmds_to_run:
             with open(args.cmds_to_run, 'w') as cmds_out:
                 for cmd in jobs_to_run:
-                    print(cmd, file = cmds_out)
+                    print(cmd, file=cmds_out)
 
         if args.failed_cmds:
             with open(args.failed_cmds, 'w') as failed_out:
                 for failed_cmd in failed_jobs_any:
-                    print(failed_cmd, file = failed_out)
+                    print(failed_cmd, file=failed_out)
+
+        if args.remain:
+            with open(args.remain, 'w') as remain_out:
+                for failed_cmd in failed_jobs_any:
+                    print(failed_cmd, file=remain_out)
+                for cmd in jobs_to_run:
+                    print(cmd, file=remain_out)
 
         if blank_cmds > 0 or blank_log_cmds > 0:
             print('\n\nThere were ' + str(blank_cmds) + ' empty lines in the input command file, and ' + str(blank_log_cmds) + ' empty commands in the logfile.\n',
-                  file = sys.stderr)
+                  file=sys.stderr)
+
 
 if __name__ == '__main__':
     main()
