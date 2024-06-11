@@ -176,6 +176,9 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
         print('successful_jobs_after_fail ' + str(len(successful_jobs_after_fail)))
         print('failed_jobs_after_success ' + str(len(failed_jobs_after_success)))
 
+        jobs_to_run = sorted(list(jobs_to_run))
+        failed_jobs_any = sorted(list(failed_jobs_any))
+
         if args.cmds_to_run:
             with open(args.cmds_to_run, 'w') as cmds_out:
                 for cmd in jobs_to_run:
