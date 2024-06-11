@@ -14,6 +14,8 @@ It will provide a breakdown of how many commands fit into the following categori
 1. Finished successfully (and only present once in log)
 2. Failed (and only present once in log)
 3. Were never run (i.e., not found in log)
+
+This information can also be output, but only if there is at least on occurrence of each (because they are rare issues):
 4. Present multiple times in log, but was successful everytime. Indicates redundancy and likely user error.
 5. Present multiple times in log, but failed everytime.
 6. Finished successfully upon last instance, but failed when run earlier in log (so likely re-run after an error)
@@ -93,16 +95,12 @@ python ../joblog_summary.py --cmds gzip_cmds.sh --log gzip_log2.txt
 
 You should see:
 ```
-successful_jobs_unique 10
-failed_jobs_unique 0
-jobs_not_run 0
-successful_jobs_redundant 0
-failed_jobs_repeated 0
-successful_jobs_after_fail 0
-failed_jobs_after_success 0
+Successful (and present once in joblog)	10
+Failed (and present once in joblog)	0
+Not run (i.e., not present in joblog)	0
 ```
 
-In this case all jobs were run, and no jobs failed (note that the rows 4-7 correspond capture cases where a job is in the joblog file multiple times, which can happen if GNU parallel is instructed to re-run failed jobs, for instance).
+In this case all jobs were run, and no jobs failed. Note that additional information can also be output in rare cases where they are wonky lines in the joblog file (especially when commands are present twice).
 
 **But what about if there _are_ failed jobs?** We can create this scenario by simply adding another command to gzip a file that doesn't exist.
 
