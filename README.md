@@ -11,15 +11,16 @@ Compares an input file containing all commands passed to GNU parallel using the 
 There should be one command per line in this file. This script compares this file with the resulting logfile created by using the `--joblog` option.
 
 It will provide a breakdown of how many commands fit into the following categories (to standard output):
-1. Finished successfully (and only present once in log)
-2. Failed (and only present once in log)
-3. Were never run (i.e., not found in log)
+1. Finished successfully (and only present once in log).
+2. Failed (and only present once in log).
+3. Were never run (i.e., not found in log).
 
-This information can also be output, but only if there is at least on occurrence of each (because they are rare issues):
-4. Present multiple times in log, but was successful everytime. Indicates redundancy and likely user error.
-5. Present multiple times in log, but failed everytime.
-6. Finished successfully upon last instance, but failed when run earlier in log (so likely re-run after an error)
-7. Produced error upon last instance in log, but was successful at least once in another instance. This is a redflag that a successful job might have been partially overwritten.
+This information about duplicate commands in the logfile can also be output, but only if there is at least one occurrence (because they are rare issues):  
+
+* Present multiple times in log, but was successful everytime. Indicates redundancy and likely user error.
+* Present multiple times in log, but failed everytime.
+* Finished successfully upon last instance, but failed when run earlier in log (so likely re-run after an error).
+* Produced error upon last instance in log, but was successful at least once in another instance. This is a redflag that a successful job might have been partially overwritten.  
 
 An error will be thrown if there are any commands in the log file that are not present in the commands file. Also, note that empty commands (in input command file or in logfile) will be ignored. This can happen if people put empty lines in between input commands accidently.
  
@@ -100,7 +101,7 @@ Failed (and present once in joblog)	0
 Not run (i.e., not present in joblog)	0
 ```
 
-In this case all jobs were run, and no jobs failed. Note that additional information can also be output in rare cases where they are wonky lines in the joblog file (especially when commands are present twice).
+In this case all jobs were run, and no jobs failed. Note that additional information can also be output in rare cases where they are wonky lines in the joblog file (especially when commands are present twice), but that information was not output here as there were no duplicate commands in the logfile.
 
 **But what about if there _are_ failed jobs?** We can create this scenario by simply adding another command to gzip a file that doesn't exist.
 
@@ -109,7 +110,7 @@ Decompress the files a final time:
 gunzip testfile*txt.gz
 ```
 
-Add an additional gzip command for a file that doesn't exist, which will cause an error, and re-run gzip commands with `parallel`:
+Add an additional gzip command for a file that does not exist, which will cause an error, and re-run gzip commands with `parallel`:
 ```
 echo "gzip testfile.Iamgonnafail.txt" >> gzip_cmds.sh
 cat gzip_cmds.sh | parallel -j 2 --eta --joblog gzip_log3.txt '{}'
@@ -123,4 +124,4 @@ python ../joblog_summary.py --cmds gzip_cmds.sh \
                             --failed_cmds gzip_failed_cmds.txt
 ```
 
-The summary counts should not indicate that one job failed, which you can see in `gzip_failed_cmds.txt`.
+The summary counts should indicate that one job failed, which you can see in `gzip_failed_cmds.txt`.
