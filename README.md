@@ -1,4 +1,4 @@
-# parallel_joblog_summary
+# GNU Parallel joblog summary
 
 **Script for summarizing GNU parallel joblog file. Useful for identifying how many and which jobs failed (if any), and to ensure that all commands finished successfully.**
 
@@ -26,10 +26,10 @@ If specified, jobs that were never run, and jobs that were run but failed, can b
 **Usage example:**
 
 ```
-python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt \
-                                   --log JOBLOG.txt \
-                                   --cmds_to_run REMAINING_CMDS_FILE.txt \
-                                   --failed_cmds FAILED_CMDS.txt
+python joblog_summary.py --cmds CMDS_FILE.txt \
+                         --log JOBLOG.txt \
+                         --cmds_to_run REMAINING_CMDS_FILE.txt \
+                         --failed_cmds FAILED_CMDS.txt
 ```
 
 ## Standard GNU Parallel examples
@@ -80,15 +80,15 @@ cat gzip_cmds.sh | parallel -j 2 --eta --joblog gzip_log2.txt '{}'
 The result should be the same as above!
 
 
-## Detailed gnu.parallel_cmds_vs_log.py usage example
+## Detailed joblog_summary.py usage example
 
-`gnu.parallel_cmds_vs_log.py` is useful when you are running many commands in parallel, and you are concerned that some jobs may not have run or threw an error. Note that this requires that the commands run are present in a file, using the approach we used to run `gzip_cmds.sh` above, so that the original commands can be compared to those in the `--joblog` output table.
+`joblog_summary.py` is useful when you are running many commands in parallel, and you are concerned that some jobs may not have run or threw an error. Note that this requires that the commands run are present in a file, using the approach we used to run `gzip_cmds.sh` above, so that the original commands can be compared to those in the `--joblog` output table.
 
 The basic usage is to just get summary counts of the numbers of jobs in different categories (corresponding to the seven categories described at the top of this page).
 
 For instance, if you run:
 ```
-python ../gnu.parallel_cmds_vs_log.py --cmds gzip_cmds.sh --log gzip_log2.txt
+python ../joblog_summary.py --cmds gzip_cmds.sh --log gzip_log2.txt
 ```
 
 You should see:
@@ -120,9 +120,9 @@ You should have the error `gzip: testfile.Iamgonnafail.txt: No such file or dire
 
 To get a summary of the parallel joblog file, and **to get a file containing all failed commands** (which can make it easier to re-run commands after you fix the problem):
 ```
-python ../gnu.parallel_cmds_vs_log.py --cmds gzip_cmds.sh \
-                                      --log gzip_log3.txt \
-                                      --failed_cmds gzip_failed_cmds.txt
+python ../joblog_summary.py --cmds gzip_cmds.sh \
+                            --log gzip_log3.txt \
+                            --failed_cmds gzip_failed_cmds.txt
 ```
 
 The summary counts should not indicate that one job failed, which you can see in `gzip_failed_cmds.txt`.
