@@ -46,8 +46,8 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
                         default=None,
                         required=False)
 
-    parser.add_argument('--remain', metavar="UNFINISHED_CMDS", type=str,
-                        help="Path to new commands file containing commands that were either unrun or that failed (i.e., combination of --cmds_to_run and --failed_cmds).  "
+    parser.add_argument('--unfinished', metavar="UNFINISHED_CMDS", type=str,
+                        help="Path to new commands file containing unfinished commands that were either unrun or that failed (i.e., combination of --cmds_to_run and --failed_cmds).  "
                              "Note that these commands will not be output at all unless this option is specified.",
                         default=None,
                         required=False)
@@ -189,8 +189,8 @@ python gnu.parallel_cmds_vs_log.py --cmds CMDS_FILE.txt --log JOBLOG.txt --cmds_
                 for failed_cmd in failed_jobs_any:
                     print(failed_cmd, file=failed_out)
 
-        if args.remain:
-            with open(args.remain, 'w') as remain_out:
+        if args.unfinished:
+            with open(args.unfinished, 'w') as remain_out:
                 for failed_cmd in failed_jobs_any:
                     print(failed_cmd, file=remain_out)
                 for cmd in jobs_to_run:
